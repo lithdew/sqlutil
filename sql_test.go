@@ -33,6 +33,8 @@ func createDatabase(t testing.TB) *sql.DB {
 }
 
 func createQuery(t testing.TB, db *sql.DB) *sql.Stmt {
+	t.Helper()
+
 	stmt, err := db.Prepare("SELECT * FROM test")
 	require.NoError(t, err)
 	return stmt
