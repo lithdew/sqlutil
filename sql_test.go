@@ -70,5 +70,9 @@ func BenchmarkRowsToJSON(b *testing.B) {
 		if _, err = RowsToJSON(buf[:0], rows); err != nil {
 			b.Fatal(err)
 		}
+
+		if err := rows.Close(); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
