@@ -35,7 +35,7 @@ func createDatabase(t testing.TB) *sql.DB {
 func createQuery(t testing.TB, db *sql.DB) *sql.Stmt {
 	t.Helper()
 
-	stmt, err := db.Prepare("SELECT * FROM test")
+	stmt, err := db.Prepare(`SELECT * FROM test`)
 	require.NoError(t, err)
 	return stmt
 }
@@ -44,6 +44,9 @@ func TestRowsToJSON(t *testing.T) {
 	stmt := createQuery(t, createDatabase(t))
 	rows, err := stmt.Query()
 	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, rows.Close())
+	}()
 
 	json, err := RowsToJSON(nil, rows)
 	require.NoError(t, err)
@@ -51,6 +54,27 @@ func TestRowsToJSON(t *testing.T) {
 	require.EqualValues(
 		t, `[{"id":1,"name":"a"},{"id":2,"name":"b"},{"id":3,"name":"c"},{"id":4,"name":"d"}]`, string(json),
 	)
+}
+
+func TestRowsToCSV(t *testing.T) {
+	stmt := createQuery(t, createDatabase(t))
+	rows, err := stmt.Query()
+	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, rows.Close())
+	}()
+
+	csv, err := RowsToCSV(nil, rows)
+	require.NoError(t, err)
+
+	expected := `
+id,name
+1,"a"
+2,"b"
+3,"c"
+4,"d"
+`
+	require.EqualValues(t, expected[1:], string(csv))
 }
 
 func BenchmarkRowsToJSON(b *testing.B) {
@@ -68,6 +92,30 @@ func BenchmarkRowsToJSON(b *testing.B) {
 		}
 
 		if _, err = RowsToJSON(buf[:0], rows); err != nil {
+			b.Fatal(err)
+		}
+
+		if err := rows.Close(); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkRowsToCSV(b *testing.B) {
+	stmt := createQuery(b, createDatabase(b))
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	var buf [1024]byte
+
+	for i := 0; i < b.N; i++ {
+		rows, err := stmt.Query()
+		if err != nil {
+			b.Fatal(err)
+		}
+
+		if _, err = RowsToCSV(buf[:0], rows); err != nil {
 			b.Fatal(err)
 		}
 
