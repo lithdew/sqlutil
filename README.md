@@ -64,5 +64,5 @@ goos: linux
 goarch: amd64
 pkg: github.com/lithdew/sqlutil
 BenchmarkRowsToJSON-8            1217752             10560 ns/op             616 B/op         29 allocs/op
-BenchmarkRowsToCSV-8             1000000             10157 ns/op             616 B/op         29 allocs/op
+BenchmarkRowsToCSV-8             1223127              9850 ns/op             616 B/op         29 allocs/op
 ```

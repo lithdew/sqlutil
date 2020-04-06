@@ -58,13 +58,13 @@ func RowsToCSV(dst []byte, rows *sql.Rows) ([]byte, error) {
 	}
 
 	vals := make([]interface{}, len(cols))
-	for i := 0; i < len(cols); i++ {
+	for i := range cols {
 		var val interface{}
 		vals[i] = &val
-	}
 
-	for i := range cols {
 		dst = append(dst, cols[i]...)
+
+		// Column names.
 
 		if i < len(cols)-1 {
 			dst = append(dst, ',')
@@ -79,6 +79,8 @@ func RowsToCSV(dst []byte, rows *sql.Rows) ([]byte, error) {
 		}
 
 		for i := range vals {
+			// Column values.
+
 			if dst, err = AppendValue(dst, *vals[i].(*interface{})); err != nil {
 				return nil, err
 			}
