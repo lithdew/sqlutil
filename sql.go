@@ -45,7 +45,7 @@ func AppendValue(dst []byte, src interface{}) ([]byte, error) {
 	return dst, nil
 }
 
-// RowsToJSON appends to dst the CSV representation of a list of resultant rows from a SQL query. It does
+// RowsToCSV appends to dst the CSV representation of a list of resultant rows from a SQL query. It does
 // not support multiple result sets, though may be called again after calling (*sql.Rows).NextResultSet().
 func RowsToCSV(dst []byte, rows *sql.Rows) ([]byte, error) {
 	cols, err := rows.Columns()
