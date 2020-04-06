@@ -63,6 +63,6 @@ go test -bench=. -benchmem -benchtime=10s
 goos: linux
 goarch: amd64
 pkg: github.com/lithdew/sqlutil
-BenchmarkRowsToJSON-8            1217752             10560 ns/op             616 B/op         29 allocs/op
-BenchmarkRowsToCSV-8             1223127              9850 ns/op             616 B/op         29 allocs/op
+BenchmarkRowsToJSON-8            1213502              9531 ns/op             584 B/op         27 allocs/op
+BenchmarkRowsToCSV-8             1268085              9991 ns/op             584 B/op         27 allocs/op
 ```

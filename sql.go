@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"sync"
 )
 
 // AppendValue appends to dst a UTF-8 string representation of src. Byte slices will be formatted via RFC 4648 Base64.
@@ -45,6 +46,31 @@ func AppendValue(dst []byte, src interface{}) ([]byte, error) {
 	return dst, nil
 }
 
+var valuePool = &sync.Pool{
+	New: func() interface{} {
+		return make([]interface{}, 0, 0)
+	},
+}
+
+func acquireValueBuffer(size int) []interface{} {
+	buf := valuePool.Get().([]interface{})
+
+	if n := size - cap(buf); n > 0 {
+		buf = append(buf[:cap(buf)], make([]interface{}, n)...)
+
+		for i := len(buf) - n; i < len(buf); i++ {
+			var val interface{}
+			buf[i] = &val
+		}
+	}
+
+	return buf[:size]
+}
+
+func releaseValueBuffer(buf []interface{}) {
+	valuePool.Put(buf)
+}
+
 // RowsToCSV appends to dst the CSV representation of a list of resultant rows from a SQL query. It does
 // not support multiple result sets, though may be called again after calling (*sql.Rows).NextResultSet().
 func RowsToCSV(dst []byte, rows *sql.Rows) ([]byte, error) {
@@ -57,11 +83,10 @@ func RowsToCSV(dst []byte, rows *sql.Rows) ([]byte, error) {
 		return nil, errors.New("zero columns resultant from sql query")
 	}
 
-	vals := make([]interface{}, len(cols))
-	for i := range cols {
-		var val interface{}
-		vals[i] = &val
+	vals := acquireValueBuffer(len(cols))
+	defer releaseValueBuffer(vals)
 
+	for i := range cols {
 		dst = append(dst, cols[i]...)
 
 		// Column names.
@@ -112,11 +137,8 @@ func RowsToJSON(dst []byte, rows *sql.Rows) ([]byte, error) {
 		return nil, errors.New("zero columns resultant from sql query")
 	}
 
-	vals := make([]interface{}, len(cols))
-	for i := 0; i < len(cols); i++ {
-		var val interface{}
-		vals[i] = &val
-	}
+	vals := acquireValueBuffer(len(cols))
+	defer releaseValueBuffer(vals)
 
 	dst = append(dst, '[')
 
