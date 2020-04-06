@@ -6,6 +6,55 @@ Utilities for working with SQL in Go.
 - Convert `*sql.Rows` into JSON with minimal allocations.
 - Convert `*sql.Rows` into CSV with minimal allocations.
 
+## Example
+
+Given the SQL query:
+
+```sqlite
+CREATE TABLE test (id integer primary key autoincrement, name varchar);
+
+INSERT INTO test (name) VALUES ('a');
+INSERT INTO test (name) VALUES ('b');
+INSERT INTO test (name) VALUES ('c');
+INSERT INTO test (name) VALUES ('d');
+
+SELECT * FROM test;
+```
+
+`sqlutil.RowsToJSON` would yield:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "a"
+  },
+  {
+    "id": 2,
+    "name": "b"
+  },
+  {
+    "id": 3,
+    "name": "c"
+  },
+  {
+    "id": 4,
+    "name": "d"
+  }
+]
+```
+
+`sqlutil.RowsToCSV` would yield:
+
+```csv
+id,name
+1,"a"
+2,"b"
+3,"c"
+4,"d"
+```
+
+
 ## Benchmarks
 
 ```
