@@ -9,6 +9,7 @@ Utilities for working with SQL in Go.
 - Append an opinionated UTF-8 string representation of an `interface{}` to a byte slice, with byte slices being encoded into RFC-4648 Base64.
 - Convert `*sql.Rows` into JSON with minimal allocations.
 - Convert `*sql.Rows` into CSV with minimal allocations.
+- Parse/evaluate SQL statements with named parameters.
 
 ## Example
 
